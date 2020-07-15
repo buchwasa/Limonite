@@ -5,7 +5,7 @@ authors = ["fludixx <fludixs@protonmail.com>"]
 edition = "2018"
 
 [dependencies]
-colored = "1.9.0"
+colored = "2.0.0"
 chrono = "0.4.13"
 rand = "0.7.2"
 log = "0.4"
