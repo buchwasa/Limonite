@@ -36,14 +36,18 @@ impl Handler for Server {
                 resp.push_u64(self.server_id);
                 resp.push_magic();
                 resp.push_string(format!(
-                    "MCPE;{};{};{};{};{};{};rustrock;{};",
-                    "rustrock",     // motd
-                    389,            // protocol
-                    "1.14.0",       // version
+                    "MCPE;{};{};{};{};{};{};{};{};{},{},{}",
+                    "Limonite",     // motd
+                    407,            // protocol
+                    "1.16.10",      // version
                     0,              // online players
                     20,             // max players
                     self.server_id, // server_id
-                    "Survival"      // gamemode
+                    "world",        // world name
+                    "Survival",     // gamemode
+                    0,              // int gamemode
+                    19132           // ipv4 port
+                    19133           // ipv6 port
                 ));
             }
             PacketId::ConnectionRequest1 => {

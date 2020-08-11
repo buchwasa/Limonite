@@ -1,7 +1,6 @@
 [package]
-name = "rustrock"
-version = "0.1.0"
-authors = ["fludixx <fludixs@protonmail.com>"]
+name = "Limonite"
+version = "1.0.0"
 edition = "2018"
 
 [dependencies]

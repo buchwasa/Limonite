@@ -6,12 +6,11 @@ mod protocol;
 mod server;
 
 fn main() {
-    let server = thread::Builder::new()
+    let server_thread = thread::Builder::new()
         .name("Bedrock Server".to_string())
         .spawn(|| {
-            let mut server = Server::new("0.0.0.0:19132".to_string());
-            server.start();
+            Server::new("0.0.0.0:19132".to_string()).start();
         })
         .expect("Could not start server!");
-    server.join();
+    server_thread.join();
 }

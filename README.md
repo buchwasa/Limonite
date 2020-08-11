@@ -1,2 +1,1 @@
-# Rustrock
-Minecraft Bedrock server software in Rust.
+Original author: fludixx
