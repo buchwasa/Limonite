@@ -7,7 +7,7 @@ mod server;
 
 fn main() {
     let server = thread::Builder::new()
-        .name("server".to_string())
+        .name("Bedrock Server".to_string())
         .spawn(|| {
             let mut server = Server::new("0.0.0.0:19132".to_string());
             server.start();
