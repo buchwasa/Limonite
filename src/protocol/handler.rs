@@ -36,7 +36,7 @@ impl Handler for Server {
                 resp.push_u64(self.server_id);
                 resp.push_magic();
                 resp.push_string(format!(
-                    "MCPE;{};{};{};{};{};{};{};{};{},{},{}",
+                    "MCPE;{};{};{};{};{};{};{};{};{};{};{};",
                     "Limonite",     // motd
                     407,            // protocol
                     "1.16.10",      // version
@@ -45,16 +45,16 @@ impl Handler for Server {
                     self.server_id, // server_id
                     "world",        // world name
                     "Survival",     // gamemode
-                    0,              // int gamemode
+                    1,              // is limited to switch
                     19132,          // ipv4 port
-                    19133           // ipv6 port
+                    19133,          // ipv6 port
                 ));
             }
             PacketId::ConnectionRequest1 => {
                 let raknet_version = packet_bytes[17];
                 let mtu_size = packet_bytes[19..].len() as i16;
                 if raknet_version != RAKNET_VERSION {
-                    info!(
+                    println!( //TODO: Use log
                         "{} has an incompatible raknet protocol ({})",
                         src.to_string(),
                         raknet_version

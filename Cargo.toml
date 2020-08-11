@@ -1,5 +1,5 @@
 [package]
-name = "Limonite"
+name = "limonite"
 version = "1.0.0"
 edition = "2018"
 
