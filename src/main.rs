@@ -6,8 +6,7 @@ use simplelog::*;
 use std::thread;
 use std::fs::File;
 
-mod utils;
-mod protocol;
+mod raknet;
 mod server;
 
 fn main() {

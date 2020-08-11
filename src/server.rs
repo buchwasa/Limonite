@@ -1,7 +1,7 @@
-use crate::protocol::client::Client;
+use crate::raknet::protocol::client::Client;
 use std::net::{SocketAddr, UdpSocket};
 
-use crate::protocol::handler::Handler;
+use crate::raknet::protocol::handler::Handler;
 use rand::random;
 use std::collections::HashMap;
 use std::ops::Add;

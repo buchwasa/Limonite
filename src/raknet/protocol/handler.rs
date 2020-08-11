@@ -1,10 +1,10 @@
-use crate::utils::buffer::PacketBufferRead;
-use crate::utils::buffer::PacketBufferWrite;
-use crate::protocol::client::Client;
-use crate::protocol::packet::{
+use crate::raknet::utils::buffer::PacketBufferRead;
+use crate::raknet::utils::buffer::PacketBufferWrite;
+use crate::raknet::protocol::client::Client;
+use crate::raknet::protocol::packet::{
     EncapsulatedPacket, PacketFlags, PacketInfo, PacketType, Reliability,
 };
-use crate::protocol::{PacketId, RAKNET_VERSION};
+use crate::raknet::protocol::{PacketId, RAKNET_VERSION};
 use crate::server::Server;
 use std::net::{SocketAddr, SocketAddrV4};
 use std::process::exit;
@@ -13,6 +13,7 @@ pub trait Handler {
     fn handle_packet(&mut self, packet: &[u8], src: SocketAddr);
 }
 
+//TODO: Split up handler.
 impl Handler for Server {
     fn handle_packet(&mut self, packet_bytes: &[u8], src: SocketAddr) {
         let packet_info = PacketInfo::from_bytes(&packet_bytes);
@@ -37,7 +38,7 @@ impl Handler for Server {
                 resp.push_string(format!(
                     "MCPE;{};{};{};{};{};{};{};{};{};{};{};",
                     "Limonite",     // motd
-                    407,            // protocol
+                    407,            // raknet.protocol
                     "1.16.10",      // version
                     0,              // online players
                     20,             // max players
@@ -54,7 +55,7 @@ impl Handler for Server {
                 let mtu_size = packet_bytes[19..].len() as i16;
                 if raknet_version != RAKNET_VERSION {
                     debug!(
-                        "{} has an incompatible raknet protocol ({})",
+                        "{} has an incompatible raknet raknet.protocol ({})",
                         src.to_string(),
                         raknet_version
                     );

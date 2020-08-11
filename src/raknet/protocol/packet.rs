@@ -1,5 +1,5 @@
-use crate::utils::buffer::{PacketBufferRead, PacketBufferWrite};
-use crate::protocol::PacketId;
+use crate::raknet::utils::buffer::{PacketBufferRead, PacketBufferWrite};
+use crate::raknet::protocol::PacketId;
 use std::borrow::Borrow;
 use std::convert::{TryFrom, TryInto};
 use std::error::Error;

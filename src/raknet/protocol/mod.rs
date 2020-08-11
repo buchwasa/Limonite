@@ -1,4 +1,4 @@
-use crate::protocol::packet::PacketFlags;
+use crate::raknet::protocol::packet::PacketFlags;
 
 pub mod client;
 pub mod handler;
