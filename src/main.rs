@@ -18,7 +18,7 @@ fn main() {
     ]);
 
     let server_thread = thread::Builder::new()
-        .name("bedrock server".to_string())
+        .name("Bedrock Server".to_string())
         .spawn(|| {
             info!("Server starting on port 19132");
             let mut server = Server::new("0.0.0.0:19132".to_string());
