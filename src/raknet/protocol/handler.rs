@@ -6,7 +6,7 @@ use crate::raknet::protocol::packet::{
 };
 use crate::raknet::protocol::{PacketId, RAKNET_VERSION};
 use crate::server::Server;
-use std::net::{SocketAddr, SocketAddrV4};
+use std::net::{SocketAddr};
 use std::process::exit;
 
 pub trait Handler {

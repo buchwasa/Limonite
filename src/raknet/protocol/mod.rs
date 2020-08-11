@@ -1,5 +1,3 @@
-use crate::raknet::protocol::packet::PacketFlags;
-
 pub mod client;
 pub mod handler;
 pub mod packet;

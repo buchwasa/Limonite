@@ -1,10 +1,7 @@
 use crate::raknet::utils::buffer::{PacketBufferRead, PacketBufferWrite};
 use crate::raknet::protocol::PacketId;
-use std::borrow::Borrow;
 use std::convert::{TryFrom, TryInto};
-use std::error::Error;
 use std::io::ErrorKind;
-use std::num::TryFromIntError;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(u8)]
