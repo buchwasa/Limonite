@@ -46,7 +46,7 @@ impl Handler for Server {
                     "world",        // world name
                     "Survival",     // gamemode
                     0,              // int gamemode
-                    19132           // ipv4 port
+                    19132,          // ipv4 port
                     19133           // ipv6 port
                 ));
             }
