@@ -1,15 +1,27 @@
+#[macro_use] extern crate log;
+extern crate simplelog;
+
 use crate::server::Server;
+use simplelog::*;
 use std::thread;
+use std::fs::File;
 
 mod utils;
 mod protocol;
 mod server;
 
 fn main() {
+    let mut config = ConfigBuilder::new();
+    config.set_time_to_local(true);
+    CombinedLogger::init(vec![
+        TermLogger::new(LevelFilter::Trace, config.build(), TerminalMode::Mixed),
+        WriteLogger::new(LevelFilter::Info, config.build(), File::create("server.log").unwrap())
+    ]);
+
     let server_thread = thread::Builder::new()
         .name("bedrock server".to_string())
         .spawn(|| {
-            println!("Server started!");
+            info!("Server starting on port 19132");
             let mut server = Server::new("0.0.0.0:19132".to_string());
             server.start();
         })

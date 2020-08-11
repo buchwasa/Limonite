@@ -6,7 +6,6 @@ use crate::protocol::packet::{
 };
 use crate::protocol::{PacketId, RAKNET_VERSION};
 use crate::server::Server;
-use log::{debug, error, info, warn};
 use std::net::{SocketAddr, SocketAddrV4};
 use std::process::exit;
 
@@ -54,7 +53,7 @@ impl Handler for Server {
                 let raknet_version = packet_bytes[17];
                 let mtu_size = packet_bytes[19..].len() as i16;
                 if raknet_version != RAKNET_VERSION {
-                    println!( //TODO: Use log
+                    debug!(
                         "{} has an incompatible raknet protocol ({})",
                         src.to_string(),
                         raknet_version

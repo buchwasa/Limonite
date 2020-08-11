@@ -2,7 +2,6 @@ use crate::protocol::client::Client;
 use std::net::{SocketAddr, UdpSocket};
 
 use crate::protocol::handler::Handler;
-use log::info;
 use rand::random;
 use std::collections::HashMap;
 use std::ops::Add;
