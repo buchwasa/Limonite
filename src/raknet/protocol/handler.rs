@@ -7,8 +7,11 @@ use crate::raknet::protocol::packet::{
 use crate::raknet::protocol::{PacketId, RAKNET_VERSION};
 use crate::server::Server;
 use std::net::{SocketAddr};
-use std::process::exit;
 use crate::raknet::protocol::outbound::unconnectedpong::UnconnectedPong;
+use crate::raknet::protocol::outbound::incompatibleprotocolversion::IncompatibleProtocolVersion;
+use crate::raknet::protocol::outbound::connectionreply1::ConnectionReply1;
+use crate::raknet::protocol::outbound::connectionreply2::ConnectionReply2;
+use crate::raknet::protocol::outbound::connectionrequestaccepted::ConnectionRequestAccepted;
 
 pub trait Handler {
     fn handle_packet(&mut self, packet: &[u8], src: SocketAddr);
@@ -33,45 +36,23 @@ impl Handler for Server {
 
         match packet_info.packet_id().unwrap() {
             PacketId::UnconnectedPing => {
-                let mut pong_packet = UnconnectedPong::create(self.start.elapsed().unwrap().as_millis(), self.server_id);
-                resp.push(pong_packet.packet_id);
-                resp.push_u64(pong_packet.timestamp as u64);
-                resp.push_u64(pong_packet.server_id);
-                resp.push_magic();
-                resp.push_string(format!(
-                    "MCPE;{};{};{};{};{};{};{};{};{};{};{};",
-                    "Limonite",     // motd
-                    407,            // protocol
-                    "1.16.10",      // version
-                    0,              // online players
-                    20,             // max players
-                    self.server_id, // server_id
-                    "world",        // world name
-                    "Survival",     // gamemode
-                    1,              // is limited to switch
-                    19132,          // ipv4 port
-                    19133,          // ipv6 port
-                ));
+                let pong_packet = UnconnectedPong::create(self.start.elapsed().unwrap().as_millis(), self.server_id);
+                resp = pong_packet.encode(resp.clone());
             }
             PacketId::ConnectionRequest1 => {
                 let raknet_version = packet_bytes[17];
                 let mtu_size = packet_bytes[19..].len() as i16;
                 if raknet_version != RAKNET_VERSION {
                     debug!(
-                        "{} has an incompatible raknet raknet.protocol ({})",
+                        "{} has an incompatible raknet version ({})",
                         src.to_string(),
                         raknet_version
                     );
-                    resp.push(PacketId::IncompatibleProtocolVersion as u8);
-                    resp.push(raknet_version);
-                    resp.push_magic();
-                    resp.push_u64(self.server_id);
+                    let ipv_packet = IncompatibleProtocolVersion::create(raknet_version, self.server_id);
+                    resp = ipv_packet.encode(resp.clone());
                 } else {
-                    resp.push(PacketId::ConnectionReply1 as u8);
-                    resp.push_magic();
-                    resp.push_u64(self.server_id);
-                    resp.push(0x00);
-                    resp.push_i16(mtu_size);
+                    let reply_1 = ConnectionReply1::create(self.server_id, 0x00, mtu_size);
+                    resp = reply_1.encode(resp.clone());
                 }
                 self.clients
                     .insert(src.to_string(), Client::new(src.clone(), mtu_size));
@@ -79,12 +60,8 @@ impl Handler for Server {
             PacketId::ConnectionRequest2 => {
                 let client = self.clients.get_mut(&src.to_string()).unwrap();
                 client.set_relationship(packet_bytes.read_address(17));
-                resp.push(PacketId::ConnectionReply2 as u8);
-                resp.push_magic();
-                resp.push_u64(self.server_id);
-                resp.push_address(src);
-                resp.push_i16(client.mtu_size());
-                resp.push(0x00);
+                let reply_2 = ConnectionReply2::create(self.server_id, client.mtu_size(), 0x00);
+                resp = reply_2.encode(resp.clone());
             }
             PacketId::ConnectionRequest => {
                 let encapsulated_packet = EncapsulatedPacket::decode(&packet_bytes);
@@ -99,22 +76,8 @@ impl Handler for Server {
                     .get_mut(src.to_string().as_str())
                     .unwrap()
                     .set_guid(guid);
-                resp.push(PacketId::ConnectionRequestAccepted as u8);
-                resp.push_address(src);
-                resp.push_u16(0);
-                resp.push_address(
-                    self.clients
-                        .get(&src.to_string())
-                        .unwrap()
-                        .relationship()
-                        .unwrap(),
-                );
-                for _ in 1..10 {
-                    // no idea what this could be
-                    resp.push_address("0.0.0.0:0".parse().unwrap());
-                }
-                resp.push_u64(time_since_start);
-                resp.push_u64(self.start.elapsed().unwrap().as_millis() as u64);
+                let connection_request_accepted = ConnectionRequestAccepted::create(src, time_since_start, self.start.elapsed().unwrap().as_millis() as u64);
+                resp = connection_request_accepted.encode(resp.clone());
                 let pk = EncapsulatedPacket {
                     packet_type: PacketType {
                         is_connected_to_peer: true,
@@ -143,7 +106,6 @@ impl Handler for Server {
                     packet_info.packet_id(),
                 );
                 println!("{:#?}\nlen: {}", packet_bytes, packet_bytes.len());
-                exit(0);
             }
         }
         if resp.len() > 0 {
