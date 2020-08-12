@@ -33,7 +33,7 @@ impl Server {
         let mut buff: [u8; 2048] = [0; 2048];
         self.sock = Some(
             UdpSocket::bind(self.bind_to.clone())
-                .expect(format!("Failed to bind {}!", self.bind_to).as_str()),
+                .expect(format!("Failed to bind {}", self.bind_to).as_str()),
         );
         loop {
             let (len, src) = self.sock.as_ref().unwrap().recv_from(&mut buff).unwrap();

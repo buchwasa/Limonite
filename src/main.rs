@@ -24,6 +24,6 @@ fn main() {
             let mut server = Server::new("0.0.0.0:19132".to_string());
             server.start();
         })
-        .expect("Could not start server!");
-    server_thread.join();
+        .expect("Could not start server");
+    server_thread.join().expect("Failed to join threads");
 }

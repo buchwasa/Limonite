@@ -1,3 +1,4 @@
+mod outbound;
 pub mod client;
 pub mod handler;
 pub mod packet;

@@ -8,6 +8,7 @@ use crate::raknet::protocol::{PacketId, RAKNET_VERSION};
 use crate::server::Server;
 use std::net::{SocketAddr};
 use std::process::exit;
+use crate::raknet::protocol::outbound::unconnectedpong::UnconnectedPong;
 
 pub trait Handler {
     fn handle_packet(&mut self, packet: &[u8], src: SocketAddr);
@@ -29,16 +30,18 @@ impl Handler for Server {
             src.to_string(),
             packet_info.is_encapsulated()
         );
+
         match packet_info.packet_id().unwrap() {
             PacketId::UnconnectedPing => {
-                resp.push(PacketId::UnconnectedPong as u8);
-                resp.push_u64(self.start.elapsed().unwrap().as_millis() as u64);
-                resp.push_u64(self.server_id);
+                let mut pong_packet = UnconnectedPong::create(self.start.elapsed().unwrap().as_millis(), self.server_id);
+                resp.push(pong_packet.packet_id);
+                resp.push_u64(pong_packet.timestamp as u64);
+                resp.push_u64(pong_packet.server_id);
                 resp.push_magic();
                 resp.push_string(format!(
                     "MCPE;{};{};{};{};{};{};{};{};{};{};{};",
                     "Limonite",     // motd
-                    407,            // raknet.protocol
+                    407,            // protocol
                     "1.16.10",      // version
                     0,              // online players
                     20,             // max players
