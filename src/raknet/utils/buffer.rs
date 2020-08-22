@@ -30,6 +30,7 @@ pub trait PacketBufferWrite {
     fn push_u32(&mut self, num: u32);
     fn push_u64(&mut self, num: u64);
     fn push_u128(&mut self, num: u128);
+    fn push_i8(&mut self, num: i8);
     fn push_i16(&mut self, num: i16);
     fn push_i32(&mut self, num: i32);
     fn push_i64(&mut self, num: i64);
@@ -149,6 +150,10 @@ impl PacketBufferWrite for Vec<u8> {
     }
 
     fn push_u128(&mut self, num: u128) {
+        self.push_slice(&num.to_be_bytes());
+    }
+
+    fn push_i8(&mut self, num: i8) {
         self.push_slice(&num.to_be_bytes());
     }
 

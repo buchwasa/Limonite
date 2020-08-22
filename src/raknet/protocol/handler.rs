@@ -97,7 +97,7 @@ impl Handler for Server {
                     sequence_number_range: None,
                     body: Some(resp.clone()),
                 };
-                resp = pk.encode();
+                resp
             }
             _ => {
                 warn!(

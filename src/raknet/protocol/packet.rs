@@ -6,10 +6,14 @@ use std::io::ErrorKind;
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(u8)]
 pub enum Reliability {
-    // TODO: Complete
-    Reliable = 0b010,        // 2
-    ReliableOrdered = 0b011, // 3 - This one is not fully implemented
-    Unreliable = 0b000,      // 0
+    Unreliable = 0b000,
+    UnreliableSequenced = 0b001,
+    Reliable = 0b010,
+    ReliableOrdered = 0b011,
+    ReliableSequenced = 0b100,
+    UnreliableAck = 0b101,
+    ReliableAck = 0b110,
+    ReliableOrderedAck = 0b111,
 }
 
 impl TryFrom<u8> for Reliability {
@@ -18,8 +22,13 @@ impl TryFrom<u8> for Reliability {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0b000 => Ok(Reliability::Unreliable),
+            0b001 => Ok(Reliability::UnreliableSequenced),
             0b010 => Ok(Reliability::Reliable),
             0b011 => Ok(Reliability::ReliableOrdered),
+            0b100 => Ok(Reliability::ReliableSequenced),
+            0b101 => Ok(Reliability::UnreliableAck),
+            0b110 => Ok(Reliability::ReliableAck),
+            0b111 => Ok(Reliability::ReliableOrderedAck),
             _ => Err(()),
         }
     }
@@ -151,88 +160,10 @@ impl EncapsulatedPacket {
     }
 
     pub fn decode(bytes: &[u8]) -> Result<EncapsulatedPacket, std::io::Error> {
-        let packet_type = PacketType::from_u8(bytes[0]);
-        let mut sequence_number = None;
-        let mut record_count = None;
-        let mut packet_flags = None;
-        let mut reliable_packets = None;
-        let mut sequence_number_range = None;
-        let mut body = None;
-        if packet_type.is_ack {
-            reliable_packets = None;
-            packet_flags = None;
-            record_count = Some(u16::from_be_bytes(bytes[1..3].try_into().unwrap()));
-            sequence_number = None;
-            body = None;
-            let mut sequence_number_max = [0u8; 4];
-            if bytes[3] == 1 {
-                sequence_number_max[0..3].clone_from_slice(&bytes[7..10]);
-            }
-            let sequence_number_range = Some(SequenceNumberRange {
-                max_equals_to_min: bytes[3] == 1,
-                sequence_number_min: bytes.read_u24(4),
-                sequence_number_max: if bytes[3] == 1 {
-                    Some(bytes.read_u24(7))
-                } else {
-                    None
-                },
-            });
-            body = None;
-        } else {
-            let packet_flags_raw = PacketFlags::from_u8(bytes[4]).unwrap();
-            packet_flags = Some(PacketFlags::from_u8(bytes[4]).unwrap());
-            if packet_flags_raw.reliability != Reliability::Unreliable {
-                let reliable_packets = Some(bytes.read_u24(7));
-            }
-            #[rustfmt::skip]
-            let header_size =
-                if packet_flags_raw.reliability != Reliability::Unreliable {
-                    10
-                } else {
-                    7
-                };
-            body = Some(bytes[header_size..].to_vec());
-            record_count = None;
-            sequence_number = Some(bytes.read_u24(1));
-            sequence_number_range = None;
-        }
-
-        Ok(EncapsulatedPacket {
-            packet_type,
-            sequence_number,
-            record_count,
-            packet_flags,
-            reliable_packets,
-            sequence_number_range,
-            body,
-        })
     }
 
-    pub fn encode(&self) -> Vec<u8> {
-        let mut packet: Vec<u8> = Vec::new();
-        packet.push(self.packet_type.to_u8());
-        if self.packet_type.is_ack {
-            packet.push_u16(self.record_count.expect("Missing data for ACK"));
-            let snr = self
-                .sequence_number_range
-                .as_ref()
-                .expect("Missing data for ACK");
-            packet.push(if snr.max_equals_to_min { 1 } else { 0 });
-            packet.push_u24(snr.sequence_number_min);
-            if !snr.max_equals_to_min {
-                packet.push_u24(snr.sequence_number_max.expect("Missing data for ACK"));
-            }
-            packet
-        } else {
-            packet.push_u24(self.sequence_number.expect("Missing data"));
-            packet.push(self.packet_flags.as_ref().unwrap().to_u8());
-            packet.push_u16(self.body.as_ref().unwrap().len() as u16 * 8); // octets -> bits
-            if self.packet_flags.as_ref().unwrap().reliability != Reliability::Unreliable {
-                packet.push_u24(self.reliable_packets.expect("Missing data"));
-            }
-            packet.push_slice(&self.body.as_ref().unwrap());
-            packet
-        }
+    pub fn encode(&self) {
+        let mut packet: Vec<i8> = Vec::new();
     }
 }
 
