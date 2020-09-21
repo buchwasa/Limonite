@@ -2,16 +2,14 @@ use crate::raknet::utils::buffer::PacketBufferRead;
 use crate::raknet::utils::buffer::PacketBufferWrite;
 use crate::raknet::protocol::client::Client;
 use crate::raknet::protocol::packet::{
-    EncapsulatedPacket, PacketFlags, PacketInfo, PacketType, Reliability,
+    PacketFlags, PacketInfo, PacketType, Reliability,
 };
 use crate::raknet::protocol::{PacketId, RAKNET_VERSION};
 use crate::server::Server;
 use std::net::{SocketAddr};
-use crate::raknet::protocol::outbound::unconnectedpong::UnconnectedPong;
-use crate::raknet::protocol::outbound::incompatibleprotocolversion::IncompatibleProtocolVersion;
-use crate::raknet::protocol::outbound::connectionreply1::ConnectionReply1;
-use crate::raknet::protocol::outbound::connectionreply2::ConnectionReply2;
-use crate::raknet::protocol::outbound::connectionrequestaccepted::ConnectionRequestAccepted;
+use crate::raknet::protocol::outbound::{
+    UnconnectedPong, IncompatibleProtocolVersion, ConnectionReply1, ConnectionReply2
+};
 
 pub trait Handler {
     fn handle_packet(&mut self, packet: &[u8], src: SocketAddr);
@@ -64,40 +62,6 @@ impl Handler for Server {
                 resp = reply_2.encode(resp.clone());
             }
             PacketId::ConnectionRequest => {
-                let encapsulated_packet = EncapsulatedPacket::decode(&packet_bytes);
-                if encapsulated_packet.is_err() {
-                    error!("Failed to decode encapsulated Packet");
-                    return;
-                }
-                let encapsulated_packet = encapsulated_packet.unwrap();
-                let guid = encapsulated_packet.body.clone().unwrap().read_u64(1);
-                let time_since_start = encapsulated_packet.body.unwrap().read_u64(9);
-                self.clients
-                    .get_mut(src.to_string().as_str())
-                    .unwrap()
-                    .set_guid(guid);
-                let connection_request_accepted = ConnectionRequestAccepted::create(src, time_since_start, self.start.elapsed().unwrap().as_millis() as u64);
-                resp = connection_request_accepted.encode(resp.clone());
-                let pk = EncapsulatedPacket {
-                    packet_type: PacketType {
-                        is_connected_to_peer: true,
-                        is_ack: false,
-                        is_nak: false,
-                        is_pair: false,
-                        is_continuous_send: false,
-                        b_and_as: true,
-                    },
-                    sequence_number: Some(0),
-                    record_count: None,
-                    packet_flags: Some(PacketFlags {
-                        reliability: Reliability::Unreliable,
-                        has_split_packet: false,
-                    }),
-                    reliable_packets: None,
-                    sequence_number_range: None,
-                    body: Some(resp.clone()),
-                };
-                resp
             }
             _ => {
                 warn!(

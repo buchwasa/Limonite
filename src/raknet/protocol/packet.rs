@@ -57,24 +57,6 @@ pub struct PacketInfo {
 }
 
 #[derive(Debug)]
-pub struct EncapsulatedPacket {
-    pub packet_type: PacketType,
-    /// Packet sequence number, is decoded as an u24
-    pub sequence_number: Option<u32>,
-    /// Set when either NAK or ACK Packet
-    pub record_count: Option<u16>,
-    pub packet_flags: Option<PacketFlags>,
-    /// decoded as an u24
-    /// Only set when packet is Reliable
-    pub reliable_packets: Option<u32>,
-    /// Only set when ACK packet
-    pub sequence_number_range: Option<SequenceNumberRange>,
-    /// Packet Body, max size of u16::MAX (in bits)
-    /// Not set if ACK
-    pub body: Option<Vec<u8>>,
-}
-
-#[derive(Debug)]
 pub struct SequenceNumberRange {
     pub max_equals_to_min: bool,
     /// decoded as an u24
@@ -127,43 +109,6 @@ impl PacketType {
             if self.is_continuous_send   { 1 << 3 } else { 0 } |
             if self.b_and_as             { 1 << 2 } else { 0 };
         num
-    }
-}
-
-impl EncapsulatedPacket {
-    pub fn is_ack(&self) -> bool {
-        self.packet_type.is_ack
-    }
-
-    pub fn is_nak(&self) -> bool {
-        self.packet_type.is_nak
-    }
-
-    pub fn has_b_and_as(&self) -> bool {
-        self.packet_type.is_ack
-    }
-
-    pub fn needs_b_and_as(&self) -> bool {
-        self.packet_type.b_and_as
-    }
-
-    pub fn is_pair(&self) -> bool {
-        self.packet_type.is_pair
-    }
-
-    pub fn is_connected_to_peer(&self) -> bool {
-        self.packet_type.is_connected_to_peer
-    }
-
-    pub fn is_continuous_send(&self) -> bool {
-        self.packet_type.is_continuous_send
-    }
-
-    pub fn decode(bytes: &[u8]) -> Result<EncapsulatedPacket, std::io::Error> {
-    }
-
-    pub fn encode(&self) {
-        let mut packet: Vec<i8> = Vec::new();
     }
 }
 
