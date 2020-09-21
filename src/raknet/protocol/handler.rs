@@ -34,8 +34,7 @@ impl Handler for Server {
 
         match packet_info.packet_id().unwrap() {
             PacketId::UnconnectedPing => {
-                let pong_packet = UnconnectedPong::create(self.start.elapsed().unwrap().as_millis(), self.server_id);
-                resp = pong_packet.encode(resp.clone());
+                resp = UnconnectedPong::create(self.start.elapsed().unwrap().as_millis(), self.server_id).encode(resp.clone());
             }
             PacketId::ConnectionRequest1 => {
                 let raknet_version = packet_bytes[17];
@@ -46,11 +45,9 @@ impl Handler for Server {
                         src.to_string(),
                         raknet_version
                     );
-                    let ipv_packet = IncompatibleProtocolVersion::create(raknet_version, self.server_id);
-                    resp = ipv_packet.encode(resp.clone());
+                    resp = IncompatibleProtocolVersion::create(raknet_version, self.server_id).encode(resp.clone());
                 } else {
-                    let reply_1 = ConnectionReply1::create(self.server_id, 0x00, mtu_size);
-                    resp = reply_1.encode(resp.clone());
+                    resp = ConnectionReply1::create(self.server_id, 0x00, mtu_size).encode(resp.clone());
                 }
                 self.clients
                     .insert(src.to_string(), Client::new(src.clone(), mtu_size));
@@ -58,8 +55,7 @@ impl Handler for Server {
             PacketId::ConnectionRequest2 => {
                 let client = self.clients.get_mut(&src.to_string()).unwrap();
                 client.set_relationship(packet_bytes.read_address(17));
-                let reply_2 = ConnectionReply2::create(self.server_id, client.mtu_size(), 0x00);
-                resp = reply_2.encode(resp.clone());
+                resp = ConnectionReply2::create(self.server_id, client.mtu_size(), 0x00).encode(resp.clone());
             }
             PacketId::ConnectionRequest => {
             }
