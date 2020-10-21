@@ -15,7 +15,7 @@ fn main() {
     CombinedLogger::init(vec![
         TermLogger::new(LevelFilter::Trace, config.build(), TerminalMode::Mixed),
         WriteLogger::new(LevelFilter::Info, config.build(), File::create("server.log").unwrap())
-    ]);
+    ]).expect("Failed to initialize Logger");
 
     let server_thread = thread::Builder::new()
         .name("Bedrock Server".to_string())
