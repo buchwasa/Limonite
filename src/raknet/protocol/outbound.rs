@@ -1,6 +1,5 @@
-use crate::raknet::protocol::{PacketId, ADDRESS_COUNT};
+use crate::raknet::protocol::PacketId;
 use crate::raknet::utils::buffer::PacketBufferWrite;
-use std::net::SocketAddr;
 
 pub struct UnconnectedPong {
     packet_id: u8,
@@ -20,14 +19,6 @@ pub struct ConnectionReply2 {
     server_id: u64,
     mtu_size: i16,
     server_security: u8,
-}
-
-pub struct ConnectionRequestAccepted {
-    packet_id: u8,
-    address: SocketAddr,
-    //system_addresses: Vec<SocketAddr> TODO
-    ping: u64,
-    pong: u64,
 }
 
 pub struct IncompatibleProtocolVersion {
@@ -63,7 +54,7 @@ impl UnconnectedPong {
             1,              // is limited to switch
             19132,          // ipv4 port
             19133,          // ipv6 port
-        ));
+        )).expect("Failed to push string");
 
         return binary;
     }
@@ -106,30 +97,6 @@ impl ConnectionReply2 {
         binary.push_u64(self.server_id);
         binary.push_i16(self.mtu_size);
         binary.push(self.server_security);
-
-        return binary;
-    }
-}
-
-impl ConnectionRequestAccepted {
-    pub fn create(address: SocketAddr, ping: u64, pong: u64) -> ConnectionRequestAccepted {
-        ConnectionRequestAccepted {
-            packet_id: PacketId::ConnectionRequestAccepted as u8,
-            address,
-            ping,
-            pong,
-        }
-    }
-
-    pub fn encode(&self, mut binary: Vec<u8>) -> Vec<u8> {
-        binary.push(self.packet_id);
-        binary.push_address(self.address);
-        binary.push_u16(0);
-        for _ in 1..ADDRESS_COUNT {
-            binary.push_address("0.0.0.0:0".parse().unwrap());
-        }
-        binary.push_u64(self.ping);
-        binary.push_u64(self.pong);
 
         return binary;
     }

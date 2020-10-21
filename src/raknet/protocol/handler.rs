@@ -1,9 +1,6 @@
 use crate::raknet::utils::buffer::PacketBufferRead;
-use crate::raknet::utils::buffer::PacketBufferWrite;
 use crate::raknet::protocol::client::Client;
-use crate::raknet::protocol::packet::{
-    PacketFlags, PacketInfo, PacketType, Reliability,
-};
+use crate::raknet::protocol::packet::PacketInfo;
 use crate::raknet::protocol::{PacketId, RAKNET_VERSION};
 use crate::server::Server;
 use std::net::{SocketAddr};
@@ -50,7 +47,7 @@ impl Handler for Server {
                     resp = ConnectionReply1::create(self.server_id, 0x00, mtu_size).encode(resp.clone());
                 }
                 self.clients
-                    .insert(src.to_string(), Client::new(src.clone(), mtu_size));
+                    .insert(src.to_string(), Client::new(mtu_size));
             }
             PacketId::ConnectionRequest2 => {
                 let client = self.clients.get_mut(&src.to_string()).unwrap();
@@ -69,7 +66,7 @@ impl Handler for Server {
             }
         }
         if resp.len() > 0 {
-            self.sock.as_ref().unwrap().send_to(&resp, src);
+            self.sock.as_ref().unwrap().send_to(&resp, src).expect("Failed to unwrap");
         }
     }
 }

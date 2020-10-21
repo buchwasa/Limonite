@@ -1,6 +1,5 @@
-use crate::raknet::utils::buffer::{PacketBufferRead, PacketBufferWrite};
 use crate::raknet::protocol::PacketId;
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryFrom;
 use std::io::ErrorKind;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -82,10 +81,6 @@ impl PacketFlags {
             has_split_packet: (byte & (1 << 4)) != 0,
         })
     }
-
-    pub fn to_u8(&self) -> u8 {
-        ((self.reliability as u8) << 5) | if self.has_split_packet { 1 << 4 } else { 0 }
-    }
 }
 
 impl PacketType {
@@ -99,17 +94,6 @@ impl PacketType {
             b_and_as: (byte & (1 << 2)) != 0,
         }
     }
-    pub fn to_u8(&self) -> u8 {
-        #[rustfmt::skip]
-        let num =
-            if self.is_connected_to_peer { 1 << 7 } else { 0 } |
-            if self.is_ack               { 1 << 6 } else { 0 } |
-            if self.is_nak               { 1 << 5 } else { 0 } |
-            if self.is_pair              { 1 << 4 } else { 0 } |
-            if self.is_continuous_send   { 1 << 3 } else { 0 } |
-            if self.b_and_as             { 1 << 2 } else { 0 };
-        num
-    }
 }
 
 impl PacketInfo {
@@ -120,9 +104,7 @@ impl PacketInfo {
         // good enough i guess
         if PacketId::from(bytes[0]) == PacketId::Unknown {
             encapsulated = true;
-            if packet_header.is_ack || packet_header.is_nak {
-                packet_id = None;
-            } else {
+            if !packet_header.is_ack || !packet_header.is_nak {
                 let packet_flags = PacketFlags::from_u8(bytes[4]).unwrap();
                 packet_id = Some(if packet_flags.reliability != Reliability::Unreliable {
                     PacketId::from(bytes[10])
@@ -131,7 +113,6 @@ impl PacketInfo {
                 });
             }
         } else {
-            encapsulated = false;
             packet_id = Some(PacketId::from(bytes[0]));
         }
         PacketInfo {

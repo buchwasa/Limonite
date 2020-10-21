@@ -8,7 +8,7 @@ pub const MAGIC: [u8; 16] = [
 ];
 
 pub const RAKNET_VERSION: u8 = 10; //RakNet version is 6
-pub const ADDRESS_COUNT: u8 = 20; //RakNet uses 10
+//pub const ADDRESS_COUNT: u8 = 20; //RakNet uses 10
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(u8)]
