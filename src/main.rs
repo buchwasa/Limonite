@@ -22,6 +22,6 @@ fn main() {
             info!("Starting RakNet server on port 19132"); //TODO: Config
             Server::new("0.0.0.0:19132".to_string()).start();
         })
-        .expect("Could not start bedrock server");
+        .expect("Could not start RakNet server");
     server_thread.join().expect("Failed to join RakNet thread");
 }
