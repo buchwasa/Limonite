@@ -1,4 +1,4 @@
-use crate::raknet::protocol::MAGIC;
+use crate::protocol::MAGIC;
 use std::convert::TryInto;
 use std::net::{IpAddr, SocketAddr};
 use std::num::TryFromIntError;

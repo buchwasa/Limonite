@@ -1,4 +1,4 @@
-use crate::raknet::protocol::PacketId;
+use crate::protocol::PacketId;
 use std::convert::TryFrom;
 use std::io::ErrorKind;
 

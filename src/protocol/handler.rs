@@ -1,10 +1,10 @@
-use crate::raknet::utils::buffer::PacketBufferRead;
-use crate::raknet::protocol::client::Client;
-use crate::raknet::protocol::packet::PacketInfo;
-use crate::raknet::protocol::{PacketId, RAKNET_VERSION};
+use crate::utils::buffer::PacketBufferRead;
+use crate::protocol::client::Client;
+use crate::protocol::packet::PacketInfo;
+use crate::protocol::{PacketId, RAKNET_VERSION};
 use crate::server::Server;
 use std::net::{SocketAddr};
-use crate::raknet::protocol::outbound::{
+use crate::protocol::outbound::{
     UnconnectedPong, IncompatibleProtocolVersion, ConnectionReply1, ConnectionReply2
 };
 

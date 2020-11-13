@@ -1,5 +1,5 @@
-use crate::raknet::protocol::PacketId;
-use crate::raknet::utils::buffer::PacketBufferWrite;
+use crate::protocol::PacketId;
+use crate::utils::buffer::PacketBufferWrite;
 
 pub struct UnconnectedPong {
     packet_id: u8,

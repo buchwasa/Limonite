@@ -1,7 +1,7 @@
-use crate::raknet::protocol::client::Client;
+use crate::protocol::client::Client;
 use std::net::{UdpSocket};
 
-use crate::raknet::protocol::handler::Handler;
+use crate::protocol::handler::Handler;
 use rand::random;
 use std::collections::HashMap;
 use std::time::SystemTime;
