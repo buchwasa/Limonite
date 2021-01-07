@@ -7,8 +7,40 @@ pub const MAGIC: [u8; 16] = [
     0x00, 0xff, 0xff, 0x0, 0xfe, 0xfe, 0xfe, 0xfe, 0xfd, 0xfd, 0xfd, 0xfd, 0x12, 0x34, 0x56, 0x78,
 ];
 
-pub const RAKNET_VERSION: u8 = 6; //Minecraft uses 10
 //pub const ADDRESS_COUNT: u8 = 10; //Minecraft uses 20
+
+pub struct RakNetSettings {
+    version: u8,
+    address: String
+}
+
+impl RakNetSettings {
+    pub fn new(version: u8, address: String) -> RakNetSettings {
+        RakNetSettings {
+            version,
+            address
+        }
+    }
+
+    pub fn get_version(&self) -> u8 {
+        self.version
+    }
+
+    pub fn get_address(&self) -> String {
+        self.address.clone()
+    }
+
+    #[allow(dead_code)]
+    pub fn get_ip(&self) -> String {
+        let ip: Vec<&str> = self.address.split(":").collect();
+        ip[0].to_string()
+    }
+
+    pub fn get_port(&self) -> String {
+        let port: Vec<&str> = self.address.split(":").collect();
+        port[1].to_string()
+    }
+}
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[repr(u8)]

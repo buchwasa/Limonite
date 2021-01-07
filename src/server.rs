@@ -5,13 +5,15 @@ use crate::protocol::handler::Handler;
 use rand::random;
 use std::collections::HashMap;
 use std::time::SystemTime;
+use crate::protocol::RakNetSettings;
 
 pub struct Server {
+    /// unique server id
     pub server_id: u64,
     /// clients connected to the server <ip:port, Client>
     pub clients: HashMap<String, Client>,
-    /// bind address ip:port
-    pub bind_to: String,
+    /// raknet settings
+    pub raknet_settings: RakNetSettings,
     /// time server has started
     pub start: SystemTime,
     /// Server socket
@@ -19,11 +21,11 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new(bind_to: String) -> Server {
+    pub fn new(raknet_settings: RakNetSettings) -> Server {
         Server {
             server_id: random::<u64>(),
             clients: HashMap::default(),
-            bind_to,
+            raknet_settings,
             start: SystemTime::now(),
             sock: None,
         }
@@ -32,8 +34,8 @@ impl Server {
     pub fn start(&mut self) {
         let mut buff: [u8; 2048] = [0; 2048];
         self.sock = Some(
-            UdpSocket::bind(self.bind_to.clone())
-                .expect(format!("Failed to bind {}", self.bind_to).as_str()),
+            UdpSocket::bind(self.raknet_settings.get_address())
+                .expect(format!("Failed to bind to port {}", self.raknet_settings.get_port()).as_str()),
         );
         loop {
             let (len, src) = self.sock.as_ref().unwrap().recv_from(&mut buff).unwrap();

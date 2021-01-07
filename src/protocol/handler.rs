@@ -1,7 +1,7 @@
 use crate::utils::buffer::PacketBufferRead;
 use crate::protocol::client::Client;
 use crate::protocol::packet::PacketInfo;
-use crate::protocol::{PacketId, RAKNET_VERSION};
+use crate::protocol::PacketId;
 use crate::server::Server;
 use std::net::{SocketAddr};
 use crate::protocol::outbound::{
@@ -36,7 +36,7 @@ impl Handler for Server {
             PacketId::ConnectionRequest1 => {
                 let raknet_version = packet_bytes[17];
                 let mtu_size = packet_bytes[19..].len() as i16;
-                if raknet_version != RAKNET_VERSION {
+                if raknet_version != self.raknet_settings.get_version() {
                     debug!(
                         "{} has an incompatible raknet version ({})",
                         src.to_string(),
